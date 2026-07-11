@@ -1,0 +1,17 @@
+package:
+  dependencies:
+    - catenable-lists
+    - control
+    - either
+    - foldable-traversable
+    - maybe
+    - prelude
+    - tailrec
+    - transformers
+    - tuples
+    - unsafe-coerce
+  name: "free"
+
+workspace:
+  packageSet:
+    registry: 73.3.0
