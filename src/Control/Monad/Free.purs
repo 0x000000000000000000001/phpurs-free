@@ -22,10 +22,8 @@ import Control.Monad.Trans.Class (class MonadTrans)
 import Data.Either (Either(..))
 import Data.Eq (class Eq1, eq1)
 import Data.Foldable (class Foldable, foldMap, foldl, foldr)
-import Data.Maybe (Maybe(..))
 import Data.Ord (class Ord1, compare1)
 import Data.Traversable (class Traversable, traverse)
-import Data.Tuple (Tuple(..))
 
 foreign import data Free :: (Type -> Type) -> Type -> Type
 type role Free representational representational
