@@ -116,4 +116,8 @@ $_resumePrime = function($k, $j = null, $f = null) use (&$_resumePrime) {
 
 $exports['resumePrime'] = $_resumePrime;
 
+$exports['BindNode'] = __NAMESPACE__ . '\\BindNode';
+$exports['BindLeaf'] = __NAMESPACE__ . '\\BindLeaf';
+$exports['FreeObj'] = __NAMESPACE__ . '\\FreeObj';
+
 return $exports;
