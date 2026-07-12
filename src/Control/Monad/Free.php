@@ -4,13 +4,25 @@ class FreeObj {
     public $tag; // 0 = Pure, 1 = Bind
     public $valueOrFa;
     public $binds;
-    public $offset;
 
-    public function __construct($tag, $valueOrFa, array $binds = [], int $offset = 0) {
+    public function __construct($tag, $valueOrFa, $binds = null) {
         $this->tag = $tag;
         $this->valueOrFa = $valueOrFa;
         $this->binds = $binds;
-        $this->offset = $offset;
+    }
+}
+
+class BindLeaf {
+    public $k;
+    public function __construct($k) { $this->k = $k; }
+}
+
+class BindNode {
+    public $left;
+    public $right;
+    public function __construct($left, $right) {
+        $this->left = $left;
+        $this->right = $right;
     }
 }
 
@@ -22,46 +34,86 @@ $exports['liftF'] = function($fa) {
     return new FreeObj(1, $fa);
 };
 
-$exports['bindImpl'] = function($free) {
-    return function($k) use ($free) {
-        $newBinds = $free->binds;
-        $newBinds[] = $k;
-        return new FreeObj($free->tag, $free->valueOrFa, $newBinds, $free->offset);
-    };
+$_bindImpl = function($free, $k = null) use (&$_bindImpl) {
+    if (\func_num_args() < 2) {
+        $__args = \func_get_args();
+        return function(...$more) use ($__args, &$_bindImpl) {
+            return $_bindImpl(...\array_merge($__args, $more));
+        };
+    }
+    
+    $newBinds = null;
+    if ($free->binds === null) {
+        $newBinds = new BindLeaf($k);
+    } else {
+        $newBinds = new BindNode($free->binds, new BindLeaf($k));
+    }
+    return new FreeObj($free->tag, $free->valueOrFa, $newBinds);
 };
 
-$exports['resumePrime'] = function($k) {
-    return function($j) use ($k) {
-        return function($f) use ($k, $j) {
-            while (true) {
-                if ($f->tag === 0) {
-                    if ($f->offset >= count($f->binds)) {
-                        $jf = $j($f->valueOrFa);
-                        return $jf;
-                    }
-                    $b = $f->binds[$f->offset];
-                    $f2 = $b($f->valueOrFa);
-                    
-                    $restBinds = array_slice($f->binds, $f->offset + 1);
-                    if (empty($restBinds)) {
-                        $f = $f2;
-                    } else {
-                        $f2Binds = array_slice($f2->binds, $f2->offset);
-                        $newBinds = array_merge($f2Binds, $restBinds);
-                        $f = new FreeObj($f2->tag, $f2->valueOrFa, $newBinds, 0);
-                    }
-                } else {
-                    // Bind
-                    $cont = function($b) use ($f) {
-                        $restBinds = array_slice($f->binds, $f->offset);
-                        return new FreeObj(0, $b, $restBinds, 0);
-                    };
-                    $kf = $k($f->valueOrFa);
-                    return $kf($cont);
+$exports['bindImpl'] = $_bindImpl;
+
+$_resumePrime = function($k, $j = null, $f = null) use (&$_resumePrime) {
+    if (\func_num_args() < 3) {
+        $__args = \func_get_args();
+        return function(...$more) use ($__args, &$_resumePrime) {
+            return $_resumePrime(...\array_merge($__args, $more));
+        };
+    }
+    
+    while (true) {
+        if ($f->tag === 0) { // Pure
+            $curr = $f->binds;
+            $stack = [];
+            $first = null;
+            
+            while ($curr !== null) {
+                if ($curr instanceof BindLeaf) {
+                    $first = $curr->k;
+                    break;
+                } else if ($curr instanceof BindNode) {
+                    $stack[] = $curr->right;
+                    $curr = $curr->left;
                 }
             }
-        };
-    };
+
+            if ($first === null) {
+                return $j($f->valueOrFa);
+            }
+
+            $restBinds = null;
+            foreach ($stack as $s) {
+                if ($restBinds === null) {
+                    $restBinds = $s;
+                } else {
+                    $restBinds = new BindNode($s, $restBinds);
+                }
+            }
+
+            $f2 = $first($f->valueOrFa);
+            
+            $newBinds = null;
+            if ($f2->binds === null) {
+                $newBinds = $restBinds;
+            } else if ($restBinds === null) {
+                $newBinds = $f2->binds;
+            } else {
+                $newBinds = new BindNode($f2->binds, $restBinds);
+            }
+            
+            $f = new FreeObj($f2->tag, $f2->valueOrFa, $newBinds);
+
+        } else {
+            // Lift
+            $cont = function($b) use ($f) {
+                return new FreeObj(0, $b, $f->binds);
+            };
+            $kf = $k($f->valueOrFa);
+            return $kf($cont);
+        }
+    }
 };
+
+$exports['resumePrime'] = $_resumePrime;
 
 return $exports;

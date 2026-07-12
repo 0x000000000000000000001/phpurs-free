@@ -145,3 +145,4 @@ instance semigroupFree :: Semigroup a => Semigroup (Free f a) where
 
 instance monoidFree :: Monoid a => Monoid (Free f a) where
   mempty = pure mempty
+ 
