@@ -11,6 +11,13 @@ module Control.Monad.Free
   , resume
   , resumePrime
   , resume'
+  , bindImpl
+  , BindNodeClass
+  , BindLeafClass
+  , FreeObjClass
+  , bindNodeClass
+  , bindLeafClass
+  , freeObjClass
   ) where
 
 import Prelude
@@ -146,3 +153,11 @@ instance semigroupFree :: Semigroup a => Semigroup (Free f a) where
 instance monoidFree :: Monoid a => Monoid (Free f a) where
   mempty = pure mempty
  
+
+foreign import data BindNodeClass :: Type
+foreign import data BindLeafClass :: Type
+foreign import data FreeObjClass :: Type
+
+foreign import bindNodeClass :: BindNodeClass
+foreign import bindLeafClass :: BindLeafClass
+foreign import freeObjClass :: FreeObjClass

@@ -120,4 +120,8 @@ $exports['BindNode'] = __NAMESPACE__ . '\\BindNode';
 $exports['BindLeaf'] = __NAMESPACE__ . '\\BindLeaf';
 $exports['FreeObj'] = __NAMESPACE__ . '\\FreeObj';
 
+$exports['bindNodeClass'] = __NAMESPACE__ . '\\BindNode';
+$exports['bindLeafClass'] = __NAMESPACE__ . '\\BindLeaf';
+$exports['freeObjClass'] = __NAMESPACE__ . '\\FreeObj';
+
 return $exports;
