@@ -5,7 +5,7 @@ class FreeObj {
     public $valueOrFa;
     public $binds;
 
-    public function __construct($tag, $valueOrFa, $binds = null) {
+    public function __construct($tag, $valueOrFa, $binds) {
         $this->tag = $tag;
         $this->valueOrFa = $valueOrFa;
         $this->binds = $binds;
@@ -34,15 +34,9 @@ $exports['liftF'] = function($fa) {
     return new FreeObj(1, $fa);
 };
 
-$_bindImpl = function($free, $k = null) use (&$_bindImpl) {
-    if (\func_num_args() < 2) {
-        $__args = \func_get_args();
-        return function(...$more) use ($__args, &$_bindImpl) {
-            return $_bindImpl(...\array_merge($__args, $more));
-        };
-    }
+$_bindImpl = function($free, $k) use (&$_bindImpl) {
     
-    $newBinds = null;
+    $newBinds;
     if ($free->binds === null) {
         $newBinds = new BindLeaf($k);
     } else {
@@ -53,19 +47,13 @@ $_bindImpl = function($free, $k = null) use (&$_bindImpl) {
 
 $exports['bindImpl'] = $_bindImpl;
 
-$_resumePrime = function($k, $j = null, $f = null) use (&$_resumePrime) {
-    if (\func_num_args() < 3) {
-        $__args = \func_get_args();
-        return function(...$more) use ($__args, &$_resumePrime) {
-            return $_resumePrime(...\array_merge($__args, $more));
-        };
-    }
+$_resumePrime = function($k, $j, $f) use (&$_resumePrime) {
     
     while (true) {
         if ($f->tag === 0) { // Pure
             $curr = $f->binds;
             $stack = [];
-            $first = null;
+            $first;
             
             while ($curr !== null) {
                 if ($curr instanceof BindLeaf) {
@@ -81,7 +69,7 @@ $_resumePrime = function($k, $j = null, $f = null) use (&$_resumePrime) {
                 return $j($f->valueOrFa);
             }
 
-            $restBinds = null;
+            $restBinds;
             foreach ($stack as $s) {
                 if ($restBinds === null) {
                     $restBinds = $s;
@@ -92,7 +80,7 @@ $_resumePrime = function($k, $j = null, $f = null) use (&$_resumePrime) {
 
             $f2 = $first($f->valueOrFa);
             
-            $newBinds = null;
+            $newBinds;
             if ($f2->binds === null) {
                 $newBinds = $restBinds;
             } else if ($restBinds === null) {
