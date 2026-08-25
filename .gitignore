@@ -1,4 +1,5 @@
 .DS_Store
 .spago
 output
+output.bak
 .psc-ide-port
