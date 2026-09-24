@@ -5,7 +5,7 @@ class FreeObj {
     public $valueOrFa;
     public $binds;
 
-    public function __construct($tag, $valueOrFa, $binds) {
+    public function __construct($tag, $valueOrFa, $binds = null) {
         $this->tag = $tag;
         $this->valueOrFa = $valueOrFa;
         $this->binds = $binds;
@@ -36,7 +36,7 @@ $exports['liftF'] = function($fa) {
 
 $_bindImpl = function($free, $k) use (&$_bindImpl) {
     
-    $newBinds;
+    $newBinds = null;
     if ($free->binds === null) {
         $newBinds = new BindLeaf($k);
     } else {
@@ -53,7 +53,7 @@ $_resumePrime = function($k, $j, $f) use (&$_resumePrime) {
         if ($f->tag === 0) { // Pure
             $curr = $f->binds;
             $stack = [];
-            $first;
+            $first = null;
             
             while ($curr !== null) {
                 if ($curr instanceof BindLeaf) {
@@ -69,7 +69,7 @@ $_resumePrime = function($k, $j, $f) use (&$_resumePrime) {
                 return $j($f->valueOrFa);
             }
 
-            $restBinds;
+            $restBinds = null;
             foreach ($stack as $s) {
                 if ($restBinds === null) {
                     $restBinds = $s;
@@ -80,7 +80,7 @@ $_resumePrime = function($k, $j, $f) use (&$_resumePrime) {
 
             $f2 = $first($f->valueOrFa);
             
-            $newBinds;
+            $newBinds = null;
             if ($f2->binds === null) {
                 $newBinds = $restBinds;
             } else if ($restBinds === null) {
